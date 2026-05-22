@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import ImageGallery from "@/components/market/ImageGallery.client"
 import ContactSeller from "@/components/market/ContactSeller.client"
 import ListingCard from "@/components/market/ListingCard"
+import IncrementView from "@/components/market/IncrementView.client"
 import { conditionLabel, conditionStyle, categoryLabel, timeAgo } from "@/lib/supabase/types"
 import type { Listing } from "@/lib/supabase/types"
 
@@ -66,16 +66,6 @@ export default async function ListingDetailPage({
   // Non-owners can only see active listings
   if (!isOwner && listing.status !== "active") return notFound()
 
-  // Increment view count — skip owner, dedupe per browser via cookie
-  if (!isOwner) {
-    const cookieStore = await cookies()
-    const viewed = (cookieStore.get("viewed_listings")?.value ?? "").split(",").filter(Boolean)
-    if (!viewed.includes(id)) {
-      supabase.rpc("increment_listing_views", { p_listing_id: id }).then(() => {})
-      const next = [...viewed, id].slice(-200).join(",")
-      cookieStore.set("viewed_listings", next, { path: "/", maxAge: 60 * 60 * 24 * 30, httpOnly: true, sameSite: "lax" })
-    }
-  }
 
   // Fetch seller profile separately (listings.user_id -> auth.users, not profiles directly)
   const { data: seller } = await supabase
@@ -99,6 +89,7 @@ export default async function ListingDetailPage({
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8 sm:py-12">
+      {!isOwner && <IncrementView listingId={id} />}
       {/* Breadcrumb */}
       <nav className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3 text-sm text-neutral-400">
