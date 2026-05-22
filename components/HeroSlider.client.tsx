@@ -7,10 +7,10 @@ import { motion, AnimatePresence } from "framer-motion"
 
 const slides = [
     {
-    src: "/prebuiltsets.jpg",
+    src: "/marketplace.jpg",
     title: "Baltic Biggest\nSim-Racing Marketplace\njust launched",
     subtitle:
-      "Buy and sell sim-racing gear with fellow enthusiasts —\nthe Baltics' first dedicated sim-racing marketplace.",
+      "Buy and sell sim-racing gear with fellow enthusiasts\n–the Baltics' first dedicated sim-racing marketplace.",
     cta: "Browse Listings",
     href: "/market",
   },
