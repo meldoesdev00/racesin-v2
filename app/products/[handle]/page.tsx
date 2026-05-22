@@ -4,6 +4,36 @@ import ProductDetail from "../../../components/ProductDetail"
 
 export const dynamic = "force-dynamic"
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ handle: string }>
+}) {
+  const { handle } = await params
+  const data = await shopifyFetch({ query: PRODUCT_QUERY, variables: { handle } })
+  const p = data?.productByHandle
+  if (!p) return {}
+  const image = p.images?.nodes?.[0]?.url
+  const price = p.variants?.nodes?.[0]?.price?.amount
+  return {
+    title: p.title,
+    description: p.description?.slice(0, 160) || `Buy ${p.title} at Racesin.`,
+    openGraph: {
+      title: `${p.title} | Racesin`,
+      description: p.description?.slice(0, 160) || `Buy ${p.title} at Racesin.`,
+      url: `https://www.racesin.com/products/${handle}`,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: p.title }] : [],
+    },
+    alternates: { canonical: `https://www.racesin.com/products/${handle}` },
+    ...(price && {
+      other: {
+        "product:price:amount": price,
+        "product:price:currency": "EUR",
+      },
+    }),
+  }
+}
+
 const PRODUCT_QUERY = `
   query ProductByHandle($handle: String!) {
     productByHandle(handle: $handle) {

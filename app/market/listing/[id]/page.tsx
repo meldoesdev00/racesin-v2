@@ -10,6 +10,39 @@ import type { Listing } from "@/lib/supabase/types"
 
 export const dynamic = "force-dynamic"
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: listing } = await supabase
+    .from("listings")
+    .select("title, description, price, location, listing_images(url, position)")
+    .eq("id", id)
+    .eq("status", "active")
+    .single()
+  if (!listing) return {}
+  const images = [...(listing.listing_images ?? [])].sort((a: { position: number }, b: { position: number }) => a.position - b.position)
+  const image = images[0]?.url
+  const price = Math.round(listing.price).toLocaleString("de-DE")
+  const desc = listing.description
+    ? listing.description.slice(0, 140)
+    : `${listing.title} for sale — €${price}${listing.location ? ` in ${listing.location}` : ""}.`
+  return {
+    title: listing.title,
+    description: desc,
+    openGraph: {
+      title: `${listing.title} — €${price} | Racesin Market`,
+      description: desc,
+      url: `https://www.racesin.com/market/listing/${id}`,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: listing.title }] : [],
+    },
+    alternates: { canonical: `https://www.racesin.com/market/listing/${id}` },
+  }
+}
+
 export default async function ListingDetailPage({
   params,
 }: {
