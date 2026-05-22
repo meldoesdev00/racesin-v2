@@ -6,11 +6,19 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
 const slides = [
+    {
+    src: "/prebuiltsets.jpg",
+    title: "Baltic Biggest\nSim-Racing Marketplace\njust launched",
+    subtitle:
+      "Buy and sell sim-racing gear with fellow enthusiasts —\nthe Baltics' first dedicated sim-racing marketplace.",
+    cta: "Shop Now",
+    href: "/products",
+  },
   {
     src: "/simulatorrentpic.jpg",
     title: "High-Quality\nSimulator Frames",
     subtitle:
-      "We offer the highest quality sim-racing products — \nbuilt with precision, performance, and passion.",
+      "Engineered for serious sim racers — rigid aluminium profiles,\nprecise adjustability, and a setup that lasts.",
     cta: "Shop Now",
     href: "/products",
   },
