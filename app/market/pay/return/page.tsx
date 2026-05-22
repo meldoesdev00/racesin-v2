@@ -21,8 +21,9 @@ export default async function PayReturnPage({
 
   if (token) {
     try {
-      const payload = verifyMontonioToken(token) as { payment_status?: string }
-      if (payload.payment_status === "PAID") {
+      const payload = verifyMontonioToken(token) as { payment_status?: string; paymentStatus?: string }
+      const status = payload.paymentStatus ?? payload.payment_status
+      if (status === "PAID") {
         paid = true
         // Activate listing (in case webhook hasn't fired yet)
         const supabase = await createClient()
