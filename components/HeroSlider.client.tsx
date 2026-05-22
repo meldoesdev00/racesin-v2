@@ -11,8 +11,8 @@ const slides = [
     title: "Baltic Biggest\nSim-Racing Marketplace\njust launched",
     subtitle:
       "Buy and sell sim-racing gear with fellow enthusiasts —\nthe Baltics' first dedicated sim-racing marketplace.",
-    cta: "Shop Now",
-    href: "/products",
+    cta: "Browse Listings",
+    href: "/market",
   },
   {
     src: "/simulatorrentpic.jpg",
