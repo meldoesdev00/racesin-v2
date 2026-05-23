@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { createClient } from "@/lib/supabase/server"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const KLAVIYO_API_KEY = process.env.KLAVIYO_API_KEY
@@ -10,11 +11,17 @@ const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null
 
 export async function POST(req: Request) {
   try {
-    const { name, email, phone, message } = await req.json()
+    const { name, email, phone, message, product_name } = await req.json()
 
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
+
+    // Save to DB (fire and forget — don't block on failure)
+    try {
+      const supabase = await createClient()
+      await supabase.from("contact_submissions").insert({ name, email, phone, message, product_name })
+    } catch {}
 
     // Send email using Resend if configured
     if (resend) {

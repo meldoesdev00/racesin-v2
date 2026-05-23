@@ -446,7 +446,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                 body: JSON.stringify({
                                   name: inquiryName.trim(),
                                   email: inquiryEmail.trim(),
-                                  message: `Product enquiry: ${product.title}\n\n${inquiryMessage.trim()}`,
+                                  message: inquiryMessage.trim(),
+                                  product_name: product.title,
                                 }),
                               })
                               setInquiryStatus(res.ok ? "sent" : "error")
