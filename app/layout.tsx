@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import Navbar from "@/components/Navbar"
-import { CartProvider } from "@/components/CartProvider.client"
-import CartDrawer from "@/components/CartDrawer.client"
+import SiteShell from "@/components/SiteShell.client"
 import CookieConsent from "@/components/CookieConsent.client"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -117,13 +115,7 @@ export default function RootLayout({
       </head>
 
       <body className="antialiased">
-        <CartProvider>
-          <Navbar />
-          <CartDrawer />
-          {children}
-        </CartProvider>
-
-        {/* Cookie Consent Banner (loads GA only after accept) */}
+        <SiteShell>{children}</SiteShell>
         <CookieConsent />
         <Analytics />
         <SpeedInsights />

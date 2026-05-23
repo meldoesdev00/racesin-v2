@@ -16,6 +16,7 @@ export async function GET() {
     { count: pendingListings },
     { count: totalListings },
     { data: recentListings },
+    { data: draftListings },
     { data: recentInquiries },
     { count: totalInquiries },
     { data: listingsByCategory },
@@ -29,6 +30,12 @@ export async function GET() {
       .select("id, title, price, status, created_at, views, category, location")
       .order("created_at", { ascending: false })
       .limit(20),
+    supabase
+      .from("listings")
+      .select("id, title, price, created_at, category, location")
+      .eq("status", "pending_payment")
+      .order("created_at", { ascending: false })
+      .limit(50),
     supabase
       .from("contact_submissions")
       .select("*")
@@ -76,6 +83,7 @@ export async function GET() {
       totalInquiries: totalInquiries ?? 0,
     },
     recentListings: recentListings ?? [],
+    draftListings: draftListings ?? [],
     recentInquiries: recentInquiries ?? [],
     categoryBreakdown: categoryCount,
     resendEmails,
