@@ -13,6 +13,7 @@ type Stats = {
     paidListingsCount: number
     totalRevenue: number
     totalInquiries: number
+    totalListingViews: number
   }
   recentListings: {
     id: string
@@ -31,6 +32,14 @@ type Stats = {
     created_at: string
     category: string
     location: string
+    user_id: string
+    email?: string
+  }[]
+  topListingsByViews: {
+    id: string
+    title: string
+    views: number
+    category: string
   }[]
   recentInquiries: {
     id: string
@@ -48,9 +57,10 @@ type Stats = {
     subject: string
     created_at: string
   }[]
+  gaPropertyId: string | null
 }
 
-const tabs = ["Overview", "Drafts", "Inquiries", "Listings", "Emails"] as const
+const tabs = ["Overview", "Drafts", "Inquiries", "Listings", "Emails", "Analytics"] as const
 type Tab = typeof tabs[number]
 
 function timeAgo(iso: string) {
@@ -143,12 +153,13 @@ export default function AdminDashboard() {
             {/* OVERVIEW */}
             {tab === "Overview" && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {[
                     { label: "Users", value: stats.overview.totalUsers, sub: "registered accounts" },
                     { label: "Active Listings", value: stats.overview.activeListings, sub: `${stats.overview.pendingListings} unpaid drafts` },
                     { label: "Revenue", value: `€${stats.overview.totalRevenue.toFixed(2)}`, sub: `${stats.overview.paidListingsCount} paid listings` },
                     { label: "Inquiries", value: stats.overview.totalInquiries, sub: "product enquiries" },
+                    { label: "Listing Views", value: stats.overview.totalListingViews, sub: "across active listings" },
                   ].map(card => (
                     <div key={card.label} className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
                       <p className="text-neutral-400 text-xs mb-2">{card.label}</p>
@@ -213,13 +224,26 @@ export default function AdminDashboard() {
                     No drafts at the moment.
                   </div>
                 )}
+                {!stats.gaPropertyId && stats.draftListings.some(d => !d.email) && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 mb-2">
+                    Add <code className="font-mono bg-amber-100 px-1 rounded">SUPABASE_SERVICE_ROLE_KEY</code> to Vercel env to see user emails.
+                  </div>
+                )}
                 {stats.draftListings.map(l => (
-                  <div key={l.id} className="bg-white border border-neutral-200 rounded-2xl px-5 py-4 flex items-center justify-between shadow-sm">
-                    <div>
+                  <div key={l.id} className="bg-white border border-neutral-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4 shadow-sm">
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-black">{l.title}</p>
                       <p className="text-xs text-neutral-400 mt-0.5">
-                        {l.category.replace(/_/g, " ")} · {l.location || "—"} · created {timeAgo(l.created_at)}
+                        {l.category.replace(/_/g, " ")} · {l.location || "—"} · {timeAgo(l.created_at)}
                       </p>
+                      {l.email && (
+                        <a
+                          href={`mailto:${l.email}?subject=Your%20Racesin%20listing%20is%20waiting&body=Hi%2C%0A%0AYour%20listing%20%22${encodeURIComponent(l.title)}%22%20is%20ready%20to%20be%20published%20on%20Racesin%20Market.%20Complete%20payment%20to%20go%20live%3A%0Ahttps%3A%2F%2Fracesin.com%2Fmarket%2Fmy-listings`}
+                          className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                        >
+                          {l.email}
+                        </a>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-sm font-medium">€{Math.round(l.price).toLocaleString("de-DE")}</span>
@@ -298,6 +322,62 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* ANALYTICS */}
+            {tab === "Analytics" && (
+              <div className="space-y-6">
+                {/* GA4 link */}
+                <div className="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm flex items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-sm font-semibold text-neutral-800">Google Analytics</h2>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      {stats.gaPropertyId ? `Property: ${stats.gaPropertyId}` : "GA property not configured"}
+                    </p>
+                  </div>
+                  <a
+                    href="https://analytics.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:opacity-80 transition"
+                  >
+                    Open GA4 ↗
+                  </a>
+                </div>
+
+                {/* Top listings by views */}
+                <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="px-5 py-4 border-b border-neutral-100">
+                    <h2 className="text-sm font-semibold text-neutral-700">Top Listings by Views</h2>
+                    <p className="text-xs text-neutral-400 mt-0.5">Active listings with most views on Racesin Market</p>
+                  </div>
+                  <div className="divide-y divide-neutral-100">
+                    {stats.topListingsByViews.length === 0 && (
+                      <p className="px-5 py-4 text-sm text-neutral-400">No listing views yet.</p>
+                    )}
+                    {stats.topListingsByViews.map((l, i) => {
+                      const maxViews = stats.topListingsByViews[0]?.views || 1
+                      const pct = Math.round((l.views / maxViews) * 100)
+                      return (
+                        <div key={l.id} className="px-5 py-3.5">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-xs text-neutral-300 w-4 shrink-0">#{i + 1}</span>
+                              <a href={`/market/listing/${l.id}`} target="_blank" className="text-sm font-medium text-black hover:underline truncate">
+                                {l.title}
+                              </a>
+                            </div>
+                            <span className="text-sm font-semibold text-black shrink-0 ml-4">{l.views}</span>
+                          </div>
+                          <div className="h-1 bg-neutral-100 rounded-full overflow-hidden ml-6">
+                            <div className="h-full bg-black rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )}
