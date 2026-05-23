@@ -5,7 +5,9 @@ import ImageGallery from "@/components/market/ImageGallery.client"
 import ContactSeller from "@/components/market/ContactSeller.client"
 import ListingCard from "@/components/market/ListingCard"
 import IncrementView from "@/components/market/IncrementView.client"
+import MarkAsSoldButton from "@/components/market/MarkAsSoldButton.client"
 import { conditionLabel, conditionStyle, categoryLabel, timeAgo } from "@/lib/supabase/types"
+import { extractListingId, listingUrl } from "@/lib/slugify"
 import type { Listing } from "@/lib/supabase/types"
 
 export const dynamic = "force-dynamic"
@@ -16,7 +18,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }) {
   try {
-    const { id } = await params
+    const { id: rawId } = await params
+    const id = extractListingId(rawId)
     const supabase = await createClient()
     const { data: listing } = await supabase
       .from("listings")
@@ -49,7 +52,8 @@ export default async function ListingDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
+  const { id: rawId } = await params
+  const id = extractListingId(rawId)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -102,17 +106,25 @@ export default async function ListingDetailPage({
           <span>/</span>
           <span className="text-neutral-600 truncate max-w-[200px]">{listing.title}</span>
         </div>
-        {isOwner && (
-          <Link
-            href={`/market/listing/${id}/edit`}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-neutral-200 text-sm font-medium hover:border-black transition"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-            Edit listing
-          </Link>
+        {isOwner && listing.status === "active" && (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/market/listing/${id}/edit`}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-neutral-200 text-sm font-medium hover:border-black transition"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              Edit listing
+            </Link>
+            <MarkAsSoldButton listingId={id} />
+          </div>
+        )}
+        {isOwner && listing.status === "sold" && (
+          <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-neutral-100 text-sm font-medium text-neutral-500">
+            Marked as sold
+          </span>
         )}
       </nav>
 

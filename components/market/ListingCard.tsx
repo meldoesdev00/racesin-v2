@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { conditionLabel, conditionStyle, categoryLabel, timeAgo } from "@/lib/supabase/types"
+import { listingUrl } from "@/lib/slugify"
 import type { Listing } from "@/lib/supabase/types"
 
 export default function ListingCard({ listing }: { listing: Listing }) {
@@ -15,7 +16,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   return (
     <Link
-      href={`/market/listing/${listing.id}`}
+      href={listingUrl(listing.title, listing.id)}
       className="group bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-400 hover:shadow-md transition-all duration-200 flex flex-col"
     >
       {/* Image */}

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { listingUrl } from "@/lib/slugify"
 import { useRouter } from "next/navigation"
 import { conditionLabel, conditionStyle, categoryLabel, timeAgo } from "@/lib/supabase/types"
 import type { Listing } from "@/lib/supabase/types"
@@ -112,7 +113,7 @@ export default function MyListingsClient({ items, deleteListing, markSold }: Pro
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <Link href={`/market/listing/${listing.id}`} className="font-semibold text-sm hover:underline truncate block">
+                <Link href={listingUrl(listing.title, listing.id)} className="font-semibold text-sm hover:underline truncate block">
                   {listing.title}
                 </Link>
                 <div className="flex flex-wrap items-center gap-2 mt-1">

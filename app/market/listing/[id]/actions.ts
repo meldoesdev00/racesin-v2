@@ -1,6 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 
 export async function incrementViewIfNew(listingId: string) {
@@ -18,4 +19,21 @@ export async function incrementViewIfNew(listingId: string) {
     httpOnly: true,
     sameSite: "lax",
   })
+}
+
+export async function markAsSold(listingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Unauthorized" }
+
+  const { error } = await supabase
+    .from("listings")
+    .update({ status: "sold" })
+    .eq("id", listingId)
+    .eq("user_id", user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath(`/market/listing/${listingId}`)
+  revalidatePath("/market/my-listings")
+  return { ok: true }
 }

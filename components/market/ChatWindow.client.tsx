@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { listingUrl } from "@/lib/slugify"
 import { createClient } from "@/lib/supabase/client"
 import { timeAgo } from "@/lib/supabase/types"
 import type { Message, Profile } from "@/lib/supabase/types"
@@ -92,7 +93,7 @@ export default function ChatWindow({ conversation, initialMessages, currentUserI
           {/* Listing preview */}
           {listingPreview && (
             <Link
-              href={`/market/listing/${listingPreview.id}`}
+              href={listingUrl(listingPreview.title, listingPreview.id)}
               className="block bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:border-neutral-400 transition"
             >
               <div className="aspect-[4/3] bg-neutral-100 relative">
