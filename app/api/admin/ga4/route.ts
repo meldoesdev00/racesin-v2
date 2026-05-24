@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { getAdminSession } from "@/lib/adminAuth"
-import { BetaAnalyticsDataClient } from "@google-analytics/data"
 
 export async function GET(request: Request) {
   if (!(await getAdminSession())) {
@@ -23,6 +22,7 @@ export async function GET(request: Request) {
       Buffer.from(serviceAccountJson, "base64").toString("utf-8")
     )
 
+    const { BetaAnalyticsDataClient } = await import("@google-analytics/data")
     const analyticsDataClient = new BetaAnalyticsDataClient({ credentials })
     const dateRange = [{ startDate, endDate: "today" }]
     const property = `properties/${propertyId}`
