@@ -29,7 +29,7 @@ export async function GET() {
     supabase.from("listings").select("*", { count: "exact", head: true }),
     supabase
       .from("listings")
-      .select("id, title, price, status, created_at, views, category, location")
+      .select("id, title, price, status, created_at, views, category, location, listing_images(url, position)")
       .order("created_at", { ascending: false })
       .limit(20),
     supabase

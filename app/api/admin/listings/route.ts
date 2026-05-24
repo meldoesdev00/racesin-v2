@@ -145,3 +145,18 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json({ listing })
 }
+
+export async function DELETE(req: Request) {
+  if (!(await getAdminSession())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "Missing listing id" }, { status: 400 })
+
+  const adminSupabase = getAdminSupabase()
+  const { error } = await adminSupabase.from("listings").delete().eq("id", id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
