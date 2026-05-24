@@ -89,19 +89,31 @@ export default function ContactSeller({ listing, seller }: Props) {
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl p-6 space-y-4 sticky top-20">
       {/* Seller info */}
-      <Link href={`/market/seller/${listing.user_id}`} className="flex items-center gap-3 hover:opacity-80 transition">
-        <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 font-semibold text-sm flex-shrink-0 overflow-hidden">
-          {seller?.avatar_url ? (
-            <Image src={seller.avatar_url} alt={seller.name ?? ""} width={40} height={40} className="w-full h-full object-cover" />
-          ) : (
-            (listing.seller_name ?? seller?.name)?.[0]?.toUpperCase() ?? "?"
-          )}
+      {listing.seller_name ? (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 font-semibold text-sm flex-shrink-0">
+            {listing.seller_name[0].toUpperCase()}
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-neutral-900">{listing.seller_name}</p>
+            <p className="text-xs text-neutral-400">Private seller</p>
+          </div>
         </div>
-        <div>
-          <p className="font-semibold text-sm text-neutral-900">{listing.seller_name ?? seller?.name ?? "Seller"}</p>
-          <p className="text-xs text-neutral-400">View profile →</p>
-        </div>
-      </Link>
+      ) : (
+        <Link href={`/market/seller/${listing.user_id}`} className="flex items-center gap-3 hover:opacity-80 transition">
+          <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 font-semibold text-sm flex-shrink-0 overflow-hidden">
+            {seller?.avatar_url ? (
+              <Image src={seller.avatar_url} alt={seller.name ?? ""} width={40} height={40} className="w-full h-full object-cover" />
+            ) : (
+              seller?.name?.[0]?.toUpperCase() ?? "?"
+            )}
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-neutral-900">{seller?.name ?? "Seller"}</p>
+            <p className="text-xs text-neutral-400">View profile →</p>
+          </div>
+        </Link>
+      )}
 
       <hr className="border-neutral-100" />
 
