@@ -4,6 +4,25 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
 import { LISTING_FEE } from "@/lib/supabase/types"
 
+const SYSTEM_EMAIL = "listings@racesin.com"
+let cachedSystemUserId: string | null = null
+
+async function resolveSystemUserId(serviceRoleKey: string): Promise<string | null> {
+  if (cachedSystemUserId) return cachedSystemUserId
+  try {
+    const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
+    let page = 1
+    while (true) {
+      const { data } = await admin.auth.admin.listUsers({ page, perPage: 1000 })
+      const found = data?.users?.find(u => u.email === SYSTEM_EMAIL)
+      if (found) { cachedSystemUserId = found.id; return cachedSystemUserId }
+      if ((data?.users?.length ?? 0) < 1000) break
+      page++
+    }
+  } catch {}
+  return null
+}
+
 export async function GET() {
   if (!(await getAdminSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -53,10 +72,11 @@ export async function GET() {
       .limit(10),
   ])
 
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
   // Resolve user emails for drafts via service role key
   type DraftWithEmail = typeof draftListings extends (infer T)[] | null ? T & { email?: string } : never
   let draftsWithEmail: DraftWithEmail[] = (draftListings ?? []) as DraftWithEmail[]
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (serviceRoleKey && draftListings && draftListings.length > 0) {
     try {
       const adminSupabase = createAdminClient(
@@ -76,7 +96,18 @@ export async function GET() {
     } catch {}
   }
 
-  const paidListingsCount = (totalListings ?? 0) - (pendingListings ?? 0)
+  // Exclude admin-created listings from revenue (they were never paid for)
+  const systemUserId = serviceRoleKey ? await resolveSystemUserId(serviceRoleKey) : null
+  let adminListingCount = 0
+  if (systemUserId) {
+    const { count } = await supabase
+      .from("listings")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", systemUserId)
+      .neq("status", "pending_payment")
+    adminListingCount = count ?? 0
+  }
+  const paidListingsCount = (totalListings ?? 0) - (pendingListings ?? 0) - adminListingCount
   const totalRevenue = paidListingsCount * LISTING_FEE
 
   const categoryCount: Record<string, number> = {}
