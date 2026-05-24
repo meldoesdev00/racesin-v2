@@ -4,6 +4,8 @@ export type Listing = {
   title: string
   description: string | null
   category: string
+  brand: string | null
+  seller_name: string | null
   price: number
   original_price: number | null
   condition: "new" | "like-new" | "good" | "fair"

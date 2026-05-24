@@ -42,6 +42,18 @@ export default function Navbar() {
     if (!marketUser) { setUnread(0); return }
     const supabase = createClient()
 
+    supabase
+      .from("messages")
+      .select("id", { count: "exact" })
+      .eq("read", false)
+      .neq("sender_id", marketUser.id)
+      .then(({ count }) => setUnread(count ?? 0))
+  }, [marketUser, pathname])
+
+  useEffect(() => {
+    if (!marketUser) return
+    const supabase = createClient()
+
     const fetchUnread = () =>
       supabase
         .from("messages")
@@ -50,14 +62,13 @@ export default function Navbar() {
         .neq("sender_id", marketUser.id)
         .then(({ count }) => setUnread(count ?? 0))
 
-    fetchUnread()
-
     const channel = supabase
       .channel("navbar-unread")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        if (payload.new.sender_id !== marketUser.id) {
-          setUnread((n) => n + 1)
-        }
+        if (payload.new.sender_id !== marketUser.id) fetchUnread()
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, () => {
+        fetchUnread()
       })
       .subscribe()
 

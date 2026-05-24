@@ -14,23 +14,31 @@ create table public.profiles (
 
 -- ── Listings ─────────────────────────────────────────────────
 create table public.listings (
-  id          uuid primary key default gen_random_uuid(),
-  user_id     uuid references auth.users on delete cascade not null,
-  title       text not null,
-  description text,
-  category    text not null,
-  price       numeric(10,2) not null,
-  condition   text not null check (condition in ('new','like-new','good','fair')),
-  location    text,
-  phone       text,
-  email       text,
-  status      text not null default 'pending_payment'
-                check (status in ('pending_payment','active','expired','sold')),
-  views       integer not null default 0,
-  expires_at  timestamptz,
-  created_at  timestamptz default now() not null,
-  updated_at  timestamptz default now() not null
+  id            uuid primary key default gen_random_uuid(),
+  user_id       uuid references auth.users on delete cascade not null,
+  title         text not null,
+  description   text,
+  category      text not null,
+  brand         text,
+  seller_name   text,   -- custom display name for admin-created listings
+  price         numeric(10,2) not null,
+  original_price numeric(10,2),
+  condition     text not null check (condition in ('new','like-new','good','fair')),
+  location      text,
+  phone         text,
+  email         text,
+  status        text not null default 'pending_payment'
+                  check (status in ('pending_payment','active','expired','sold')),
+  views         integer not null default 0,
+  expires_at    timestamptz,
+  created_at    timestamptz default now() not null,
+  updated_at    timestamptz default now() not null
 );
+
+-- Migration (run in Supabase SQL editor if table already exists):
+-- alter table public.listings add column if not exists brand text;
+-- alter table public.listings add column if not exists seller_name text;
+-- alter table public.listings add column if not exists original_price numeric(10,2);
 
 -- ── Listing images ───────────────────────────────────────────
 create table public.listing_images (

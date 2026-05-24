@@ -6,6 +6,7 @@ import ContactSeller from "@/components/market/ContactSeller.client"
 import ListingCard from "@/components/market/ListingCard"
 import IncrementView from "@/components/market/IncrementView.client"
 import MarkAsSoldButton from "@/components/market/MarkAsSoldButton.client"
+import ShareListing from "@/components/market/ShareListing.client"
 import { conditionLabel, conditionStyle, categoryLabel, timeAgo } from "@/lib/supabase/types"
 import { extractListingId, listingUrl } from "@/lib/slugify"
 import type { Listing } from "@/lib/supabase/types"
@@ -212,6 +213,9 @@ export default async function ListingDetailPage({
               ))}
             </div>
           </div>
+
+          {/* Share */}
+          <ShareListing url={`https://www.racesin.com${listingUrl(listing.title, listing.id)}`} />
 
           {/* Contact card */}
           <ContactSeller listing={listing as Listing} seller={seller} />

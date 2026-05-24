@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { timeAgo } from "@/lib/supabase/types"
+import MarkConversationRead from "@/components/market/MarkConversationRead.client"
 
 export const dynamic = "force-dynamic"
 
@@ -85,9 +86,12 @@ export default async function MessagesPage() {
                 </div>
 
                 {unread > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-black text-white text-[10px] flex items-center justify-center font-medium flex-shrink-0">
-                    {unread > 9 ? "9+" : unread}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <MarkConversationRead conversationId={conv.id} currentUserId={user.id} />
+                    <span className="w-5 h-5 rounded-full bg-black text-white text-[10px] flex items-center justify-center font-medium">
+                      {unread > 9 ? "9+" : unread}
+                    </span>
+                  </div>
                 )}
               </Link>
             )

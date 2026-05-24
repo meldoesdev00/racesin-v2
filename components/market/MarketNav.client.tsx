@@ -27,12 +27,24 @@ export default function MarketNav() {
 
   useEffect(() => {
     if (!user) return
-    supabase
-      .from("messages")
-      .select("id", { count: "exact" })
-      .eq("read", false)
-      .neq("sender_id", user.id)
-      .then(({ count }) => setUnread(count ?? 0))
+
+    const fetchUnread = () =>
+      supabase
+        .from("messages")
+        .select("id", { count: "exact" })
+        .eq("read", false)
+        .neq("sender_id", user.id)
+        .then(({ count }) => setUnread(count ?? 0))
+
+    fetchUnread()
+
+    const channel = supabase
+      .channel("marketnav-unread")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => fetchUnread())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, () => fetchUnread())
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [user])
 
   const active = (href: string) =>

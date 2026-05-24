@@ -94,11 +94,11 @@ export default function ContactSeller({ listing, seller }: Props) {
           {seller?.avatar_url ? (
             <Image src={seller.avatar_url} alt={seller.name ?? ""} width={40} height={40} className="w-full h-full object-cover" />
           ) : (
-            seller?.name?.[0]?.toUpperCase() ?? "?"
+            (listing.seller_name ?? seller?.name)?.[0]?.toUpperCase() ?? "?"
           )}
         </div>
         <div>
-          <p className="font-semibold text-sm text-neutral-900">{seller?.name ?? "Seller"}</p>
+          <p className="font-semibold text-sm text-neutral-900">{listing.seller_name ?? seller?.name ?? "Seller"}</p>
           <p className="text-xs text-neutral-400">View profile →</p>
         </div>
       </Link>
