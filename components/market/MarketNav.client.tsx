@@ -72,27 +72,23 @@ export default function MarketNav() {
         </div>
 
         <div className="flex items-center gap-3 flex-shrink-0">
-          {authLoading ? (
-            <div className="w-20 h-6 rounded-full bg-neutral-100 animate-pulse" />
-          ) : user ? (
-            <>
-              <Link
-                href="/market/create"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-black text-white text-sm font-medium hover:opacity-80 transition"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Post a Listing
-              </Link>
-              <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = "/market" }}
-                className="text-sm text-neutral-400 hover:text-black transition"
-              >
-                Sign out
-              </button>
-            </>
-          ) : null}
+          <Link
+            href="/market/create"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-black text-white text-sm font-medium hover:opacity-80 transition"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Post a Listing
+          </Link>
+          {!authLoading && user && (
+            <button
+              onClick={async () => { await supabase.auth.signOut(); window.location.href = "/market" }}
+              className="text-sm text-neutral-400 hover:text-black transition"
+            >
+              Sign out
+            </button>
+          )}
         </div>
       </div>
     </div>
