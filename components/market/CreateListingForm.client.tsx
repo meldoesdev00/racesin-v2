@@ -426,11 +426,8 @@ export default function CreateListingForm({ userEmail }: { userEmail?: string })
               <p className="text-xl font-bold">€{LISTING_FEE}</p>
             </div>
 
-            <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-3.5 py-3 text-xs text-neutral-500 space-y-1">
-              <p className="flex items-start gap-1.5">
-                <svg className="shrink-0 mt-px" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Your listing stays live for <strong className="text-neutral-700">{LISTING_DURATION_DAYS} days</strong>. After that, you can renew it for another {LISTING_DURATION_DAYS} days by paying again — or it will be archived in your profile.
-              </p>
+            <div className="rounded-xl bg-neutral-50 border border-neutral-100 px-3.5 py-3 text-xs text-neutral-500 leading-relaxed">
+              <p>Your listing is live for <strong className="text-neutral-700">{LISTING_DURATION_DAYS} days</strong>. After expiry, renew by paying again or it will be archived in your profile.</p>
             </div>
 
             <div className="h-px bg-neutral-100" />
